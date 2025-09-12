@@ -9,7 +9,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f4f4f4;
+            background-color: white;
+            color: black;
         }
 
         /* Modal styles */
@@ -55,9 +56,9 @@
         /* Responsive styles */
         @media (max-width: 768px) {
             form {
-                width: 90%;
+                width: 95%;
                 margin: 0 auto;
-                padding: 0.9375rem;
+                padding: 1rem;
             }
 
             .itemRow {
@@ -90,10 +91,12 @@
         form {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #fff;
+            background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px #ccc;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         label {
@@ -103,32 +106,38 @@
         }
 
         input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 0.5rem;
+            width: 95%;
+            padding: 0.75rem;
             margin-bottom: 0.625rem;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 1rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            color: black;
+            height: 2.5rem;
+            box-shadow: none;
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         input[type="text"]:focus, input[type="number"]:focus {
             outline: none;
             border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0 0 3px #007bff, 0 2px 6px #007bff;
         }
 
         .itemRow {
             display: flex;
             align-items: center;
             margin-bottom: 10px;
+            gap: 10px;
         }
 
         .itemRow input {
-            flex: 1;
+            flex: 1 1 60%;
+            min-width: 150px;
             margin-right: 0.625rem;
-            height: 2.25rem;
+            height: 2.5rem;
+            box-sizing: border-box;
         }
 
         .removeItemBtn {
@@ -311,6 +320,11 @@
             text-align: left;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Print styles */
         @media print {
             body {
@@ -356,6 +370,9 @@
 </head>
 <body>
     <h1>Harsiddhi Caterers - Bill Generator</h1>
+    <div id="loadingSpinner" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1000;">
+        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+    </div>
     <form id="billForm">
         <label for="billTo">Bill To:</label><br />
         <input type="text" id="billTo" name="billTo" required />
@@ -538,6 +555,9 @@
                 return;
             }
 
+            // Show loading spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+
             // Create PDF directly using jsPDF
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -627,6 +647,12 @@
 
             // Save the PDF
             doc.save('bill.pdf');
+
+            // Hide loading spinner
+            document.getElementById('loadingSpinner').style.display = 'none';
+
+            // Show success alert
+            alert('PDF downloaded successfully!');
         }
 
 
