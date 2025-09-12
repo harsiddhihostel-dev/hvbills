@@ -645,8 +645,16 @@
             y += 20;
             doc.text('Thank you for choosing Harsiddhi Caterers!', 105, y, { align: 'center' });
 
-            // Save the PDF
-            doc.save('bill.pdf');
+            // Save the PDF with current date and time as filename
+            const now = new Date();
+            // Format date as dd/mm/yyyy for filename
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const dateStr = `${day}${month}${year}`;
+            const timeStr = now.toTimeString().slice(0,8).replace(/:/g,'');
+            const filename = `bill_${dateStr}_${timeStr}.pdf`;
+            doc.save(filename);
 
             // Hide loading spinner
             document.getElementById('loadingSpinner').style.display = 'none';
