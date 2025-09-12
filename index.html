@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Harsiddhi Caterers - Bill Generator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>H</text></svg>">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            form {
+                width: 90%;
+                margin: 0 auto;
+                padding: 0.9375rem;
+            }
+
+            .itemRow {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .itemRow input, .removeItemBtn {
+                margin: 0.3125rem 0;
+                width: 100%;
+            }
+
+            button {
+                width: 100%;
+                margin: 0.625rem 0;
+                margin-right: 0;
+            }
+
+            .bill-container {
+                width: 100%;
+                padding: 0.625rem;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.625rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .itemRow {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .itemRow input {
+            flex: 1;
+            margin-right: 0.625rem;
+            height: 2.25rem;
+        }
+
+        .removeItemBtn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0 0.625rem;
+            height: 2.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .removeItemBtn:hover {
+            background-color: #c82333;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.625rem 0.9375rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.625rem;
+            font-size: 1rem;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .bill-container {
+            max-width: 800px; /* Standard A4 width */
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .contact-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .contact-info p {
+            margin: 2px 0;
+        }
+
+        .bill-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
+        }
+
+        .bill-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        .header-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #333;
+        }
+
+        .header-box hr {
+            border: none;
+            border-top: 1px solid #333;
+            margin: 10px 0;
+        }
+
+        .spacer-row td {
+            padding: 10px 8px;
+            border: none;
+        }
+
+        .label-cell {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            width: 40%;
+        }
+
+        .section-header {
+            background-color: #e9e9e9;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .footer-cell {
+            text-align: center;
+            background-color: #f9f9f9;
+            border-top: 2px solid #333;
+            font-style: italic;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
+        }
+
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        .items-table th {
+            background-color: #f2f2f2;
+        }
+
+        .items-table tr {
+            page-break-inside: avoid;
+        }
+
+        .items-table tbody {
+            page-break-inside: auto;
+        }
+
+        .total-section {
+            page-break-inside: avoid;
+            margin-top: 20px;
+        }
+
+        .spacer-row {
+            height: 10px;
+            page-break-after: auto;
+        }
+
+        .bill-info-box {
+            border: 2px solid #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .bill-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .bill-info-item {
+            font-weight: bold;
+        }
+
+        .bill-info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bill-info-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                margin: 0;
+                background-color: white;
+            }
+
+            .bill-container {
+                max-width: 800px;
+                margin: 0;
+                padding: 20px;
+                page-break-inside: auto;
+            }
+
+            .bill-table, .items-table {
+                page-break-inside: auto;
+            }
+
+            .bill-table tr, .items-table tr {
+                page-break-inside: avoid;
+            }
+
+            .total-section {
+                page-break-inside: avoid;
+            }
+
+            .modal, .modal-content {
+                display: block !important;
+                position: static;
+                width: 100%;
+                max-width: 800px;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+
+            #billContentContainer {
+                position: static !important;
+                visibility: visible !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Harsiddhi Caterers - Bill Generator</h1>
+    <form id="billForm">
+        <label for="billTo">Bill To:</label><br />
+        <input type="text" id="billTo" name="billTo" required />
+        <div id="itemsContainer">
+            <label>Items:</label><br />
+            <div class="itemRow">
+                <input type="text" name="itemName" placeholder="Item Name" required />
+                <button type="button" class="removeItemBtn" onclick="removeItem(this)">Remove</button>
+            </div>
+        </div>
+        <button type="button" id="addItemBtn">Add Item</button><br /><br />
+
+        <label for="person">Number of Persons:</label><br />
+        <input type="number" id="person" name="person" min="1" value="1" required /><br /><br />
+
+        <label for="rate">Rate Per / Person:</label><br />
+        <input type="number" id="rate" name="rate" min="0" step="0.01" value="0" required /><br /><br />
+
+        <button type="button" id="previewBtn">Preview Bill</button>
+        <button type="button" id="downloadPdfBtn">Download PDF</button>
+    </form>
+
+    <!-- Modal for Bill Preview -->
+    <div id="billModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="closeModal">&times;</span>
+            <div id="billContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        // Function to add a new item row
+        function addItem() {
+            const itemsContainer = document.getElementById('itemsContainer');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'itemRow';
+            itemRow.innerHTML = `
+                <input type="text" name="itemName" placeholder="Item Name" required />
+                <button type="button" class="removeItemBtn" onclick="removeItem(this)">Remove</button>
+            `;
+            itemsContainer.appendChild(itemRow);
+        }
+
+        // Function to remove an item row
+        function removeItem(button) {
+            const itemRow = button.parentElement;
+            if (document.querySelectorAll('.itemRow').length > 1) {
+                itemRow.remove();
+            } else {
+                // If it's the last item, just clear the input
+                itemRow.querySelector('input[name="itemName"]').value = '';
+            }
+        }
+
+        // Event listener for add item button
+        document.getElementById('addItemBtn').addEventListener('click', addItem);
+
+        // Function to calculate total
+        function calculateTotal() {
+            const person = parseFloat(document.getElementById('person').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value) || 0;
+            return person * rate;
+        }
+
+        // Function to generate bill preview
+        function generatePreview() {
+            const billTo = document.getElementById('billTo').value;
+            const person = document.getElementById('person').value;
+            const rate = document.getElementById('rate').value;
+            const total = calculateTotal();
+
+            // Get items
+            const itemRows = document.querySelectorAll('.itemRow');
+            let itemsHtml = '';
+            
+            itemRows.forEach((row, index) => {
+                const name = row.querySelector('input[name="itemName"]').value;
+                if (name.trim() !== '') { // Ensure non-empty items
+                    itemsHtml += `<tr><td>${index + 1}</td><td>${name}</td></tr>`;
+                }
+            });
+
+            // If no items, show a message
+            if (itemsHtml === '') {
+                itemsHtml = '<tr><td colspan="2">No items added</td></tr>';
+            }
+
+            // Bill info as table to match PDF grid style
+            const billInfoHtml = `
+                <table class="bill-info-table">
+                    <tr>
+                        <td class="label-cell">Bill To:</td>
+                        <td>${billTo}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Date:</td>
+                        <td>12/09/2025</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Number of Persons:</td>
+                        <td>${person}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Rate per Person:</td>
+                        <td>₹${parseFloat(rate).toFixed(2)}</td>
+                    </tr>
+                </table>
+            `;
+
+            // Populate bill template
+            let billHtml = `
+                <div class="bill-container" id="billContentContainer">
+                    <div class="header-box">
+                        <hr>
+                        <h1 style="text-align: center; margin: 0;">Harsiddhi Caterers</h1>
+                        <div class="contact-info" style="text-align: center;">
+                            <p><strong>Mobile:</strong> +91 90990 02800 | +91 72728 82266</p>
+                            <p><strong>Email:</strong> harsiddhivatsalya@gmail.com</p>
+                            <p><strong>Address:</strong> Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019</p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="bill-info-box">
+                        ${billInfoHtml}
+                    </div>
+                    <table class="bill-table">
+                        <tbody>
+                            <tr>
+                                <td colspan="2" class="section-header"><strong>Items:</strong></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <table class="items-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Sr No.</th>
+                                                <th>Items Name</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${itemsHtml}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr class="spacer-row">
+                                <td colspan="2">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td class="label-cell"><strong>Total Amount:</strong></td>
+                                <td>₹${total.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="footer-cell">
+                                    <p>Thank you for choosing Harsiddhi Caterers!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            document.getElementById('billContent').innerHTML = billHtml;
+            openModal();
+        }
+
+        // Function to download PDF
+        function downloadPdf() {
+            const itemRows = document.querySelectorAll('.itemRow');
+            const billTo = document.getElementById('billTo').value;
+            const person = document.getElementById('person').value;
+            const rate = document.getElementById('rate').value;
+            const total = calculateTotal();
+
+            if (!billTo || !person || !rate || itemRows.length === 0) {
+                alert('Please fill in all required fields and add at least one item.');
+                return;
+            }
+
+            // Create PDF directly using jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header with single box and lines
+            let y = 15;
+            doc.setDrawColor(51, 51, 51);
+            doc.setLineWidth(0.5);
+            doc.rect(15, y, 180, 50); // Single box around header
+            y += 5;
+            doc.line(15, y, 195, y); // Line before content
+            y += 5;
+            doc.setFontSize(20);
+            doc.text('Harsiddhi Caterers', 105, y + 5, { align: 'center' });
+            y += 10;
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            doc.text('Mobile: +91 90990 02800 | +91 72728 82266', 105, y + 5, { align: 'center' });
+            y += 7;
+            doc.text('Email: harsiddhivatsalya@gmail.com', 105, y + 5, { align: 'center' });
+            y += 7;
+            doc.text('Address: Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019', 105, y + 5, { align: 'center' });
+            doc.setFont(undefined, 'normal');
+            y += 5;
+            doc.line(15, y + 5, 195, y + 5); // Line after content
+            y += 10;
+            y += 10; // Add more space
+
+            // Bill info with border
+            let billStartY = y - 5;
+            const detailsBody = [
+                ['Bill To:', billTo],
+                ['Date:', '12/09/2025'],
+                ['Number of Persons:', person],
+                ['Rate per Person:', `Rs. ${rate}`]
+            ];
+            doc.autoTable({
+                startY: y,
+                body: detailsBody,
+                theme: 'grid',
+                styles: { fontSize: 12 },
+                columnStyles: { 0: { fontStyle: 'bold' } },
+                margin: { left: 20, right: 20 }
+            });
+            let billEndY = doc.lastAutoTable.finalY + 5;
+            let billHeight = billEndY - billStartY;
+            doc.setDrawColor(51, 51, 51);
+            doc.setLineWidth(1);
+            doc.rect(15, billStartY, 180, billHeight);
+            y = doc.lastAutoTable.finalY + 10;
+
+            // Items
+            y += 5; // Add space before Items
+            doc.setFontSize(14);
+            doc.text('Items:', 20, y);
+            y += 10;
+
+            const itemsData = [];
+            itemRows.forEach((row, index) => {
+                const name = row.querySelector('input[name="itemName"]').value;
+                if (name.trim() !== '') {
+                    itemsData.push([index + 1, name]);
+                }
+            });
+
+            if (itemsData.length > 0) {
+                doc.autoTable({
+                    startY: y,
+                    head: [['Sr No.', 'Items Name']],
+                    body: itemsData,
+                    theme: 'grid',
+                    styles: { fontSize: 12 },
+                    headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
+                    margin: { left: 20, right: 20 }
+                });
+                y = doc.lastAutoTable.finalY + 10;
+            } else {
+                doc.text('No items added', 20, y);
+                y += 10;
+            }
+
+            y += 10;
+            doc.setFontSize(12);
+            doc.text(`Total Amount: Rs. ${total.toFixed(2)}`, 20, y);
+            y += 20;
+            doc.text('Thank you for choosing Harsiddhi Caterers!', 105, y, { align: 'center' });
+
+            // Save the PDF
+            doc.save('bill.pdf');
+        }
+
+
+
+        // Function to open modal
+        function openModal() {
+            document.getElementById('billModal').style.display = 'flex';
+        }
+
+        // Function to close modal
+        function closeModal() {
+            document.getElementById('billModal').style.display = 'none';
+        }
+
+        // Event listeners for buttons
+        document.getElementById('previewBtn').addEventListener('click', generatePreview);
+        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
+
+        // Event listener for modal close button
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+
+        // Close modal when clicking outside modal content
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('billModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
