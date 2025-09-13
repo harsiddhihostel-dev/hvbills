@@ -5,398 +5,577 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Harsiddhi Caterers - Bill Generator</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>H</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: white;
-            color: black;
-        }
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    color: #333;
+    line-height: 1.6;
+}
 
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
+header {
+    background-color: #28a745;
+    color: white;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+header h1 {
+    margin: 0;  
+    font-size: 2rem;
+    font-weight: 500;
+}
 
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-        }
+header i {
+    margin-right: 0.5rem;
+}
 
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            form {
-                width: 95%;
-                margin: 0 auto;
-                padding: 1rem;
-            }
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
 
-            .itemRow {
-                flex-direction: column;
-                align-items: stretch;
-            }
+/* Modal styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+}
 
-            .itemRow input, .removeItemBtn {
-                margin: 0.3125rem 0;
-                width: 100%;
-            }
+.modal-content {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
 
-            button {
-                width: 100%;
-                margin: 0.625rem 0;
-                margin-right: 0;
-            }
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.3s;
+}
 
-            .bill-container {
-                width: 100%;
-                padding: 0.625rem;
-            }
-        }
+.close-button:hover,
+.close-button:focus {
+    color: #28a745;
+}
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-        form {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px #ccc;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
+@keyframes slideIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+/* Responsive styles */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
 
-        input[type="text"], input[type="number"] {
-            width: 95%;
-            padding: 0.75rem;
-            margin-bottom: 0.625rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            background-color: white;
-            color: black;
-            height: 2.5rem;
-            box-shadow: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
+    main {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
 
-        input[type="text"]:focus, input[type="number"]:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px #007bff, 0 2px 6px #007bff;
-        }
+    form {
+        padding: 1.5rem;
+    }
 
-        .itemRow {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            gap: 10px;
-        }
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
 
-        .itemRow input {
-            flex: 1 1 60%;
-            min-width: 150px;
-            margin-right: 0.625rem;
-            height: 2.5rem;
-            box-sizing: border-box;
-        }
+    .itemRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
 
-        .removeItemBtn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 0 0.625rem;
-            height: 2.25rem;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            transition: background-color 0.3s;
-        }
+    .itemRow input {
+        margin-bottom: 0;
+    }
 
-        .removeItemBtn:hover {
-            background-color: #c82333;
-        }
+    .removeItemBtn {
+        align-self: flex-end;
+        width: auto;
+    }
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.625rem 0.9375rem;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 0.625rem;
-            font-size: 1rem;
-            transition: background-color 0.3s, transform 0.1s;
-        }
+    .button-group {
+        flex-direction: column;
+    }
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    .preview-btn, .download-btn {
+        width: 100%;
+    }
 
-        button:active {
-            transform: translateY(1px);
-        }
+    .bill-container {
+        width: 100%;
+        padding: 0.625rem;
+    }
+}
 
-        .bill-container {
-            max-width: 800px; /* Standard A4 width */
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            box-sizing: border-box;
-        }
+@media (max-width: 480px) {
+    form {
+        padding: 1rem;
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .add-btn, .preview-btn, .download-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.9rem;
+    }
+}
 
-        .contact-info {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #666;
-        }
+form {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    overflow-x: hidden;
+    margin-bottom: 2rem;
+}
 
-        .contact-info p {
-            margin: 2px 0;
-        }
+.form-group {
+    margin-bottom: 1.5rem;
+}
 
-        .bill-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
 
-        .bill-table {
-            width: 100%;
-            border-collapse: collapse;
-            page-break-inside: auto;
-        }
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
 
-        .bill-table td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            vertical-align: top;
-        }
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+}
 
-        .header-box {
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #333;
-        }
+label i {
+    margin-right: 0.5rem;
+    color: #28a745;
+}
 
-        .header-box hr {
-            border: none;
-            border-top: 1px solid #333;
-            margin: 10px 0;
-        }
+input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;
+    color: #333;
+    height: 2.5rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
 
-        .spacer-row td {
-            padding: 10px 8px;
-            border: none;
-        }
+input[type="text"]:focus, input[type="number"]:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+}
 
-        .label-cell {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            width: 40%;
-        }
+.itemRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
 
-        .section-header {
-            background-color: #e9e9e9;
-            text-align: center;
-            font-weight: bold;
-        }
+.itemRow input {
+    flex: 1;
+    height: 2.5rem;
+    box-sizing: border-box;
+}
 
-        .footer-cell {
-            text-align: center;
-            background-color: #f9f9f9;
-            border-top: 2px solid #333;
-            font-style: italic;
-        }
+.removeItemBtn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, transform 0.1s;
+    white-space: nowrap;
+}
 
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            page-break-inside: auto;
-        }
+.removeItemBtn:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
 
-        .items-table th, .items-table td {
-            border: 1px solid #ddd;
-            padding: 6px;
-            text-align: left;
-        }
+.removeItemBtn:active {
+    transform: translateY(0);
+}
 
-        .items-table th {
-            background-color: #f2f2f2;
-        }
+.add-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .items-table tr {
-            page-break-inside: avoid;
-        }
+.add-btn:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
 
-        .items-table tbody {
-            page-break-inside: auto;
-        }
+.add-btn:active {
+    transform: translateY(0);
+}
 
-        .total-section {
-            page-break-inside: avoid;
-            margin-top: 20px;
-        }
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-        .spacer-row {
-            height: 10px;
-            page-break-after: auto;
-        }
+.preview-btn, .download-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
 
-        .bill-info-box {
-            border: 2px solid #333;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-        }
+.preview-btn:hover, .download-btn:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
 
-        .bill-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            text-align: left;
-        }
+.preview-btn:active, .download-btn:active {
+    transform: translateY(0);
+}
 
-        .bill-info-item {
-            font-weight: bold;
-        }
+.bill-container {
+    max-width: 800px; /* Standard A4 width */
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    box-sizing: border-box;
+}
 
-        .bill-info-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        .bill-info-table td {
-            border: 1px solid #ddd;
-            padding: 6px;
-            text-align: left;
-        }
+.contact-info {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+.contact-info p {
+    margin: 2px 0;
+}
 
-        /* Print styles */
-        @media print {
-            body {
-                margin: 0;
-                background-color: white;
-            }
+.bill-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
 
-            .bill-container {
-                max-width: 800px;
-                margin: 0;
-                padding: 20px;
-                page-break-inside: auto;
-            }
+.bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+}
 
-            .bill-table, .items-table {
-                page-break-inside: auto;
-            }
+.bill-table td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
 
-            .bill-table tr, .items-table tr {
-                page-break-inside: avoid;
-            }
+.header-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #333;
+}
 
-            .total-section {
-                page-break-inside: avoid;
-            }
+.header-box hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 10px 0;
+}
 
-            .modal, .modal-content {
-                display: block !important;
-                position: static;
-                width: 100%;
-                max-width: 800px;
-                margin: 0;
-                padding: 0;
-                box-shadow: none;
-            }
+.spacer-row td {
+    padding: 10px 8px;
+    border: none;
+}
 
-            #billContentContainer {
-                position: static !important;
-                visibility: visible !important;
-            }
-        }
+.label-cell {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    width: 40%;
+}
+
+.section-header {
+    background-color: #e9e9e9;
+    text-align: center;
+    font-weight: bold;
+}
+
+.footer-cell {
+    text-align: center;
+    background-color: #f9f9f9;
+    border-top: 2px solid #333;
+    font-style: italic;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+}
+
+.items-table th, .items-table td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: left;
+}
+
+.items-table th {
+    background-color: #f2f2f2;
+}
+
+.items-table tr {
+    page-break-inside: avoid;
+}
+
+.items-table tbody {
+    page-break-inside: auto;
+}
+
+.total-section {
+    page-break-inside: avoid;
+    margin-top: 20px;
+}
+
+.spacer-row {
+    height: 10px;
+    page-break-after: auto;
+}
+
+.bill-info-box {
+    border: 2px solid #333;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.bill-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    text-align: left;
+}
+
+.bill-info-item {
+    font-weight: bold;
+}
+
+.bill-info-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bill-info-table td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    text-align: left;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingSpinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #28a745;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+footer {
+    background-color: #28a745;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+}
+
+footer p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+/* Print styles */
+@media print {
+    body {
+        margin: 0;
+        background-color: white;
+    }
+
+    .bill-container {
+        max-width: 800px;
+        margin: 0;
+        padding: 20px;
+        page-break-inside: auto;
+    }
+
+    .bill-table, .items-table {
+        page-break-inside: auto;
+    }
+
+    .bill-table tr, .items-table tr {
+        page-break-inside: avoid;
+    }
+
+    .total-section {
+        page-break-inside: avoid;
+    }
+
+    .modal, .modal-content {
+        display: block !important;
+        position: static;
+        width: 100%;
+        max-width: 800px;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+
+    #billContentContainer {
+        position: static !important;
+        visibility: visible !important;
+    }
+}
     </style>
 </head>
 <body>
-    <h1>Harsiddhi Caterers - Bill Generator</h1>
-    <div id="loadingSpinner" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1000;">
-        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+    <header>
+        <h1><i class="fas fa-utensils"></i> Harsiddhi Caterers - Bill Generator</h1>
+    </header>
+    <div id="loadingSpinner">
+        <div class="spinner"></div>
     </div>
-    <form id="billForm">
-        <label for="billTo">Bill To:</label><br />
-        <input type="text" id="billTo" name="billTo" required />
-        <div id="itemsContainer">
-            <label>Items:</label><br />
-            <div class="itemRow">
-                <input type="text" name="itemName" placeholder="Item Name" required />
-                <button type="button" class="removeItemBtn" onclick="removeItem(this)">Remove</button>
+    <main>
+        <form id="billForm">
+            <div class="form-group">
+                <label for="billTo"><i class="fas fa-user"></i> Bill To:</label>
+                <input type="text" id="billTo" name="billTo" required />
             </div>
-        </div>
-        <button type="button" id="addItemBtn">Add Item</button><br /><br />
+            <div id="itemsContainer">
+                <label><i class="fas fa-list"></i> Items:</label>
+                <div class="itemRow">
+                    <input type="text" name="itemName" placeholder="Item Name" required />
+                    <button type="button" class="removeItemBtn">Remove</button>
+                </div>
+            </div>
+            <button type="button" id="addItemBtn" class="add-btn"><i class="fas fa-plus"></i> Add Item</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="person"><i class="fas fa-users"></i> Number of Persons:</label>
+                    <input type="number" id="person" name="person" min="1" value="1" required />
+                </div>
+                <div class="form-group">
+                    <label for="rate"><i class="fas fa-rupee-sign"></i> Rate Per / Person:</label>
+                    <input type="number" id="rate" name="rate" min="0" step="0.01" value="0" required />
+                </div>
+            </div>
+            <div class="button-group">
+                <button type="button" id="previewBtn" class="preview-btn"><i class="fas fa-eye"></i> Preview Bill</button>
+                <button type="button" id="downloadPdfBtn" class="download-btn"><i class="fas fa-download"></i> Download PDF</button>
+            </div>
+        </form>
+    </main>
 
-        <label for="person">Number of Persons:</label><br />
-        <input type="number" id="person" name="person" min="1" value="1" required /><br /><br />
-
-        <label for="rate">Rate Per / Person:</label><br />
-        <input type="number" id="rate" name="rate" min="0" step="0.01" value="0" required /><br /><br />
-
-        <button type="button" id="previewBtn">Preview Bill</button>
-        <button type="button" id="downloadPdfBtn">Download PDF</button>
-    </form>
+    <footer>
+        <p>&copy; 2023 Harsiddhi Caterers. All rights reserved.</p>
+        <p>Contact: +91 90990 02800 | harsiddhivatsalya@gmail.com</p>
+    </footer>
 
     <!-- Modal for Bill Preview -->
-    <div id="billModal" class="modal" style="display:none;">
+    <div id="billModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeModal">&times;</span>
             <div id="billContent"></div>
@@ -407,288 +586,314 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
-        // Function to add a new item row
-        function addItem() {
-            const itemsContainer = document.getElementById('itemsContainer');
-            const itemRow = document.createElement('div');
-            itemRow.className = 'itemRow';
-            itemRow.innerHTML = `
-                <input type="text" name="itemName" placeholder="Item Name" required />
-                <button type="button" class="removeItemBtn" onclick="removeItem(this)">Remove</button>
-            `;
-            itemsContainer.appendChild(itemRow);
+// Function to add a new item row
+function addItem() {
+    const itemsContainer = document.getElementById('itemsContainer');
+    const itemRow = document.createElement('div');
+    itemRow.className = 'itemRow';
+    itemRow.innerHTML = `
+        <input type="text" name="itemName" placeholder="Item Name" required />
+        <button type="button" class="removeItemBtn" onclick="removeItem(this)">Remove</button>
+    `;
+    itemsContainer.appendChild(itemRow);
+}
+
+// Function to remove an item row
+function removeItem(button) {
+    const itemRow = button.parentElement;
+    if (document.querySelectorAll('.itemRow').length > 1) {
+        itemRow.remove();
+    } else {
+        // If it's the last item, just clear the input
+        itemRow.querySelector('input[name="itemName"]').value = '';
+    }
+}
+
+// Event listener for add item button
+document.getElementById('addItemBtn').addEventListener('click', addItem);
+
+// Function to calculate total
+function calculateTotal() {
+    const person = parseFloat(document.getElementById('person').value) || 0;
+    const rate = parseFloat(document.getElementById('rate').value) || 0;
+    return person * rate;
+}
+
+// Function to generate bill preview
+function generatePreview() {
+    const billTo = document.getElementById('billTo').value;
+    const person = document.getElementById('person').value;
+    const rate = document.getElementById('rate').value;
+    const total = calculateTotal();
+
+    // Get items
+    const itemRows = document.querySelectorAll('.itemRow');
+    let itemsHtml = '';
+
+    itemRows.forEach((row, index) => {
+        const name = row.querySelector('input[name="itemName"]').value;
+        if (name.trim() !== '') { // Ensure non-empty items
+            itemsHtml += `<tr><td>${index + 1}</td><td>${name}</td></tr>`;
         }
+    });
 
-        // Function to remove an item row
-        function removeItem(button) {
-            const itemRow = button.parentElement;
-            if (document.querySelectorAll('.itemRow').length > 1) {
-                itemRow.remove();
-            } else {
-                // If it's the last item, just clear the input
-                itemRow.querySelector('input[name="itemName"]').value = '';
-            }
-        }
+    // If no items, show a message
+    if (itemsHtml === '') {
+        itemsHtml = '<tr><td colspan="2">No items added</td></tr>';
+    }
 
-        // Event listener for add item button
-        document.getElementById('addItemBtn').addEventListener('click', addItem);
+    // Bill info as table to match PDF grid style
+    const billInfoHtml = `
+        <table class="bill-info-table">
+            <tr>
+                <td class="label-cell">Bill To:</td>
+                <td>${billTo}</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Date:</td>
+                <td>12/09/2025</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Number of Persons:</td>
+                <td>${person}</td>
+            </tr>
+            <tr>
+                <td class="label-cell">Rate per Person:</td>
+                <td>₹${parseFloat(rate).toFixed(2)}</td>
+            </tr>
+        </table>
+    `;
 
-        // Function to calculate total
-        function calculateTotal() {
-            const person = parseFloat(document.getElementById('person').value) || 0;
-            const rate = parseFloat(document.getElementById('rate').value) || 0;
-            return person * rate;
-        }
-
-        // Function to generate bill preview
-        function generatePreview() {
-            const billTo = document.getElementById('billTo').value;
-            const person = document.getElementById('person').value;
-            const rate = document.getElementById('rate').value;
-            const total = calculateTotal();
-
-            // Get items
-            const itemRows = document.querySelectorAll('.itemRow');
-            let itemsHtml = '';
-            
-            itemRows.forEach((row, index) => {
-                const name = row.querySelector('input[name="itemName"]').value;
-                if (name.trim() !== '') { // Ensure non-empty items
-                    itemsHtml += `<tr><td>${index + 1}</td><td>${name}</td></tr>`;
-                }
-            });
-
-            // If no items, show a message
-            if (itemsHtml === '') {
-                itemsHtml = '<tr><td colspan="2">No items added</td></tr>';
-            }
-
-            // Bill info as table to match PDF grid style
-            const billInfoHtml = `
-                <table class="bill-info-table">
-                    <tr>
-                        <td class="label-cell">Bill To:</td>
-                        <td>${billTo}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Date:</td>
-                        <td>12/09/2025</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Number of Persons:</td>
-                        <td>${person}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">Rate per Person:</td>
-                        <td>₹${parseFloat(rate).toFixed(2)}</td>
-                    </tr>
-                </table>
-            `;
-
-            // Populate bill template
-            let billHtml = `
-                <div class="bill-container" id="billContentContainer">
-                    <div class="header-box">
-                        <hr>
-                        <h1 style="text-align: center; margin: 0;">Harsiddhi Caterers</h1>
-                        <div class="contact-info" style="text-align: center;">
-                            <p><strong>Mobile:</strong> +91 90990 02800 | +91 72728 82266</p>
-                            <p><strong>Email:</strong> harsiddhivatsalya@gmail.com</p>
-                            <p><strong>Address:</strong> Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019</p>
-                        </div>
-                        <hr>
-                    </div>
-                    <div class="bill-info-box">
-                        ${billInfoHtml}
-                    </div>
-                    <table class="bill-table">
-                        <tbody>
-                            <tr>
-                                <td colspan="2" class="section-header"><strong>Items:</strong></td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <table class="items-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Sr No.</th>
-                                                <th>Items Name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${itemsHtml}
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr class="spacer-row">
-                                <td colspan="2">&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td class="label-cell"><strong>Total Amount:</strong></td>
-                                <td>₹${total.toFixed(2)}</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="footer-cell">
-                                    <p>Thank you for choosing Harsiddhi Caterers!</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+    // Populate bill template
+    let billHtml = `
+        <div class="bill-container" id="billContentContainer">
+            <div class="header-box">
+                <hr>
+                <h1 style="text-align: center; margin: 0;">Harsiddhi Caterers</h1>
+                <div class="contact-info" style="text-align: center;">
+                    <p><strong>Mobile:</strong> +91 90990 02800 | +91 72728 82266</p>
+                    <p><strong>Email:</strong> harsiddhivatsalya@gmail.com</p>
+                    <p><strong>Address:</strong> Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019</p>
                 </div>
-            `;
+                <hr>
+            </div>
+            <div class="bill-info-box">
+                ${billInfoHtml}
+            </div>
+            <table class="bill-table">
+                <tbody>
+                    <tr>
+                        <td colspan="2" class="section-header"><strong>Items:</strong></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <table class="items-table">
+                                <thead>
+                                    <tr>
+                                        <th>Sr No.</th>
+                                        <th>Items Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="spacer-row">
+                        <td colspan="2">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell"><strong>Total Amount:</strong></td>
+                        <td>₹${total.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="footer-cell">
+                            <p>Thank you for choosing Harsiddhi Caterers!</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `;
 
-            document.getElementById('billContent').innerHTML = billHtml;
-            openModal();
+    document.getElementById('billContent').innerHTML = billHtml;
+    openModal();
+}
+
+// Function to download PDF
+function downloadPdf() {
+    const itemRows = document.querySelectorAll('.itemRow');
+    const billTo = document.getElementById('billTo').value;
+    const person = document.getElementById('person').value;
+    const rate = document.getElementById('rate').value;
+    const total = calculateTotal();
+
+    if (!billTo || !person || !rate || itemRows.length === 0) {
+        alert('Please fill in all required fields and add at least one item.');
+        return;
+    }
+
+    // Show loading spinner
+    document.getElementById('loadingSpinner').style.display = 'block';
+
+    // Create PDF directly using jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header with single box and lines
+    let y = 15;
+    doc.setDrawColor(51, 51, 51);
+    doc.setLineWidth(0.5);
+    doc.rect(15, y, 180, 50); // Single box around header
+    y += 5;
+    doc.line(15, y, 195, y); // Line before content
+    y += 5;
+    doc.setFontSize(20);
+    doc.text('Harsiddhi Caterers', 105, y + 5, { align: 'center' });
+    y += 10;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Mobile: +91 90990 02800 | +91 72728 82266', 105, y + 5, { align: 'center' });
+    y += 7;
+    doc.text('Email: harsiddhivatsalya@gmail.com', 105, y + 5, { align: 'center' });
+    y += 7;
+    doc.text('Address: Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019', 105, y + 5, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    y += 5;
+    doc.line(15, y + 5, 195, y + 5); // Line after content
+    y += 10;
+    y += 10; // Add more space
+
+    // Bill info with border
+    let billStartY = y - 5;
+    const detailsBody = [
+        ['Bill To:', billTo],
+        ['Date:', '12/09/2025'],
+        ['Number of Persons:', person],
+        ['Rate per Person:', `Rs. ${rate}`]
+    ];
+    doc.autoTable({
+        startY: y,
+        body: detailsBody,
+        theme: 'grid',
+        styles: { fontSize: 12 },
+        columnStyles: { 0: { fontStyle: 'bold' } },
+        margin: { left: 20, right: 20 }
+    });
+    let billEndY = doc.lastAutoTable.finalY + 5;
+    let billHeight = billEndY - billStartY;
+    doc.setDrawColor(51, 51, 51);
+    doc.setLineWidth(1);
+    doc.rect(15, billStartY, 180, billHeight);
+    y = doc.lastAutoTable.finalY + 10;
+
+    // Items
+    y += 5; // Add space before Items
+    doc.setFontSize(14);
+    doc.text('Items:', 20, y);
+    y += 10;
+
+    const itemsData = [];
+    itemRows.forEach((row, index) => {
+        const name = row.querySelector('input[name="itemName"]').value;
+        if (name.trim() !== '') {
+            itemsData.push([index + 1, name]);
         }
+    });
 
-        // Function to download PDF
-        function downloadPdf() {
-            const itemRows = document.querySelectorAll('.itemRow');
-            const billTo = document.getElementById('billTo').value;
-            const person = document.getElementById('person').value;
-            const rate = document.getElementById('rate').value;
-            const total = calculateTotal();
-
-            if (!billTo || !person || !rate || itemRows.length === 0) {
-                alert('Please fill in all required fields and add at least one item.');
-                return;
-            }
-
-            // Show loading spinner
-            document.getElementById('loadingSpinner').style.display = 'block';
-
-            // Create PDF directly using jsPDF
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Header with single box and lines
-            let y = 15;
-            doc.setDrawColor(51, 51, 51);
-            doc.setLineWidth(0.5);
-            doc.rect(15, y, 180, 50); // Single box around header
-            y += 5;
-            doc.line(15, y, 195, y); // Line before content
-            y += 5;
-            doc.setFontSize(20);
-            doc.text('Harsiddhi Caterers', 105, y + 5, { align: 'center' });
-            y += 10;
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'bold');
-            doc.text('Mobile: +91 90990 02800 | +91 72728 82266', 105, y + 5, { align: 'center' });
-            y += 7;
-            doc.text('Email: harsiddhivatsalya@gmail.com', 105, y + 5, { align: 'center' });
-            y += 7;
-            doc.text('Address: Harshidhhi Vatsalya PG/Hostel, Amodar, Gujarat 390019', 105, y + 5, { align: 'center' });
-            doc.setFont(undefined, 'normal');
-            y += 5;
-            doc.line(15, y + 5, 195, y + 5); // Line after content
-            y += 10;
-            y += 10; // Add more space
-
-            // Bill info with border
-            let billStartY = y - 5;
-            const detailsBody = [
-                ['Bill To:', billTo],
-                ['Date:', '12/09/2025'],
-                ['Number of Persons:', person],
-                ['Rate per Person:', `Rs. ${rate}`]
-            ];
-            doc.autoTable({
-                startY: y,
-                body: detailsBody,
-                theme: 'grid',
-                styles: { fontSize: 12 },
-                columnStyles: { 0: { fontStyle: 'bold' } },
-                margin: { left: 20, right: 20 }
-            });
-            let billEndY = doc.lastAutoTable.finalY + 5;
-            let billHeight = billEndY - billStartY;
-            doc.setDrawColor(51, 51, 51);
-            doc.setLineWidth(1);
-            doc.rect(15, billStartY, 180, billHeight);
-            y = doc.lastAutoTable.finalY + 10;
-
-            // Items
-            y += 5; // Add space before Items
-            doc.setFontSize(14);
-            doc.text('Items:', 20, y);
-            y += 10;
-
-            const itemsData = [];
-            itemRows.forEach((row, index) => {
-                const name = row.querySelector('input[name="itemName"]').value;
-                if (name.trim() !== '') {
-                    itemsData.push([index + 1, name]);
-                }
-            });
-
-            if (itemsData.length > 0) {
-                doc.autoTable({
-                    startY: y,
-                    head: [['Sr No.', 'Items Name']],
-                    body: itemsData,
-                    theme: 'grid',
-                    styles: { fontSize: 12 },
-                    headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
-                    margin: { left: 20, right: 20 }
-                });
-                y = doc.lastAutoTable.finalY + 10;
-            } else {
-                doc.text('No items added', 20, y);
-                y += 10;
-            }
-
-            y += 10;
-            doc.setFontSize(12);
-            doc.text(`Total Amount: Rs. ${total.toFixed(2)}`, 20, y);
-            y += 20;
-            doc.text('Thank you for choosing Harsiddhi Caterers!', 105, y, { align: 'center' });
-
-            // Save the PDF with current date and time as filename
-            const now = new Date();
-            // Format date as dd/mm/yyyy for filename
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const dateStr = `${day}${month}${year}`;
-            const timeStr = now.toTimeString().slice(0,8).replace(/:/g,'');
-            const filename = `bill_${dateStr}_${timeStr}.pdf`;
-            doc.save(filename);
-
-            // Hide loading spinner
-            document.getElementById('loadingSpinner').style.display = 'none';
-
-            // Show success alert
-            alert('PDF downloaded successfully!');
-        }
-
-
-
-        // Function to open modal
-        function openModal() {
-            document.getElementById('billModal').style.display = 'flex';
-        }
-
-        // Function to close modal
-        function closeModal() {
-            document.getElementById('billModal').style.display = 'none';
-        }
-
-        // Event listeners for buttons
-        document.getElementById('previewBtn').addEventListener('click', generatePreview);
-        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
-
-        // Event listener for modal close button
-        document.getElementById('closeModal').addEventListener('click', closeModal);
-
-        // Close modal when clicking outside modal content
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('billModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+    if (itemsData.length > 0) {
+        doc.autoTable({
+            startY: y,
+            head: [['Sr No.', 'Items Name']],
+            body: itemsData,
+            theme: 'grid',
+            styles: { fontSize: 12 },
+            headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
+            margin: { left: 20, right: 20 }
         });
+        y = doc.lastAutoTable.finalY + 10;
+    } else {
+        doc.text('No items added', 20, y);
+        y += 10;
+    }
+
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(`Total Amount: Rs. ${total.toFixed(2)}`, 20, y);
+    y += 20;
+    doc.text('Thank you for choosing Harsiddhi Caterers!', 105, y, { align: 'center' });
+
+    // Save the PDF with current date and time as filename
+    const now = new Date();
+    // Format date as dd/mm/yyyy for filename
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const dateStr = `${day}${month}${year}`;
+    const timeStr = now.toTimeString().slice(0,8).replace(/:/g,'');
+    const filename = `bill_${dateStr}_${timeStr}.pdf`;
+    doc.save(filename);
+
+    // Hide loading spinner
+    document.getElementById('loadingSpinner').style.display = 'none';
+
+    // Show success alert
+    // alert('PDF downloaded successfully!');
+    showSuccessMessage('PDF downloaded successfully!');
+}
+
+// Function to show success message box in center
+function showSuccessMessage(message) {
+    const existingBox = document.getElementById('successMessageBox');
+    if (existingBox) {
+        existingBox.remove();
+    }
+    const box = document.createElement('div');
+    box.id = 'successMessageBox';
+    box.textContent = message;
+    box.style.position = 'fixed';
+    box.style.top = '50%';
+    box.style.left = '50%';
+    box.style.transform = 'translate(-50%, -50%)';
+    box.style.backgroundColor = '#28a745';
+    box.style.color = 'white';
+    box.style.padding = '1rem 2rem';
+    box.style.borderRadius = '8px';
+    box.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+    box.style.zIndex = '2000';
+    box.style.fontSize = '1.2rem';
+    box.style.textAlign = 'center';
+    document.body.appendChild(box);
+    setTimeout(() => {
+        box.remove();
+    }, 3000);
+}
+
+// Function to open modal
+function openModal() {
+    document.getElementById('billModal').style.display = 'flex';
+}
+
+// Function to close modal
+function closeModal() {
+    document.getElementById('billModal').style.display = 'none';
+}
+
+// Event listeners for buttons
+document.getElementById('previewBtn').addEventListener('click', generatePreview);
+document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
+
+// Event listener for modal close button
+document.getElementById('closeModal').addEventListener('click', closeModal);
+
+// Close modal when clicking outside modal content
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('billModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+});
     </script>
 </body>
 </html>
