@@ -7,11 +7,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>H</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;700&display=swap" rel="stylesheet">
     <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Noto Sans Gujarati', 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
     background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
@@ -619,6 +620,12 @@ function calculateTotal() {
     return person * rate;
 }
 
+// Function to detect if text contains Gujarati characters
+function isGujarati(text) {
+    const gujaratiRegex = /[\u0A80-\u0AFF]/;
+    return gujaratiRegex.test(text);
+}
+
 // Function to generate bill preview
 function generatePreview() {
     const billTo = document.getElementById('billTo').value;
@@ -722,7 +729,7 @@ function generatePreview() {
 }
 
 // Function to download PDF
-function downloadPdf() {
+async function downloadPdf() {
     const itemRows = document.querySelectorAll('.itemRow');
     const billTo = document.getElementById('billTo').value;
     const person = document.getElementById('person').value;
@@ -737,9 +744,20 @@ function downloadPdf() {
     // Show loading spinner
     document.getElementById('loadingSpinner').style.display = 'block';
 
+    // Load Gujarati font
+    const response = await fetch('noto_font_base64.txt');
+    const fontData = await response.text();
+
     // Create PDF directly using jsPDF
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
+    // Add and set Gujarati font
+    doc.addFileToVFS('NotoSansGujarati-Regular.ttf', fontData);
+    doc.addFont('NotoSansGujarati-Regular.ttf', 'NotoSansGujarati', 'normal');
+
+    // Set default font to Helvetica for English
+    doc.setFont('helvetica');
 
     // Header with single box and lines
     let y = 15;
@@ -779,7 +797,12 @@ function downloadPdf() {
         theme: 'grid',
         styles: { fontSize: 12 },
         columnStyles: { 0: { fontStyle: 'bold' } },
-        margin: { left: 20, right: 20 }
+        margin: { left: 20, right: 20 },
+        didParseCell: function(data) {
+            if (data.column.index === 1 && isGujarati(data.cell.text)) {
+                data.cell.styles.font = 'NotoSansGujarati';
+            }
+        }
     });
     let billEndY = doc.lastAutoTable.finalY + 5;
     let billHeight = billEndY - billStartY;
@@ -810,7 +833,12 @@ function downloadPdf() {
             theme: 'grid',
             styles: { fontSize: 12 },
             headStyles: { fillColor: [0, 0, 0], textColor: [255, 255, 255] },
-            margin: { left: 20, right: 20 }
+            margin: { left: 20, right: 20 },
+            didParseCell: function(data) {
+                if (data.column.index === 1 && isGujarati(data.cell.text)) {
+                    data.cell.styles.font = 'NotoSansGujarati';
+                }
+            }
         });
         y = doc.lastAutoTable.finalY + 10;
     } else {
@@ -839,7 +867,6 @@ function downloadPdf() {
     document.getElementById('loadingSpinner').style.display = 'none';
 
     // Show success alert
-    // alert('PDF downloaded successfully!');
     showSuccessMessage('PDF downloaded successfully!');
 }
 
@@ -882,7 +909,7 @@ function closeModal() {
 
 // Event listeners for buttons
 document.getElementById('previewBtn').addEventListener('click', generatePreview);
-document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
+document.getElementById('downloadPdfBtn').addEventListener('click', async () => { await downloadPdf(); });
 
 // Event listener for modal close button
 document.getElementById('closeModal').addEventListener('click', closeModal);
